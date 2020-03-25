@@ -1,0 +1,28 @@
+{
+  "name": "restful_pi",
+  "version": "1.0.5",
+  "description": "RESTful API for raspberry gpio",
+  "main": "Server.js",
+  "scripts": {
+    "test": "curl http://localhost:3000/devices/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jski7/RESTful_pi.git"
+  },
+  "keywords": [
+    "REST",
+    "API",
+    "node.js",
+    "express"
+  ],
+  "author": "Jakub Kirklewski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jski7/RESTful_pi/issues"
+  },
+  "homepage": "https://github.com/jski7/RESTful_pi#readme",
+  "dependencies": {
+    "rpio": "^2.1.1"
+  }
+}

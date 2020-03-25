@@ -1,8 +1,11 @@
 var express = require('express');
+var rpio = require('rpio');
 const app = express();
 const { v4: uuidv4 } = require('uuid');
-let {board, devices} = require('./dbs/db1.cjs');
+let {board, devices} = require('./dbs/dbs.cjs');
 const fs = require('fs');
+
+// rpio.close(16, rpio.PIN_RESET); // tbd rest pins
 
 app.use(express.json()); 				//JSON support
 app.use(express.urlencoded({ extended: true }));	//URL request support
@@ -10,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));	//URL request support
 function databaseUpdate() {
   	devices_export = '\nlet devices = ' + JSON.stringify(devices) + ';\nmodule.exports.devices = devices;\n';
 	board_export = '\nlet board = '+ JSON.stringify(board) + ';\nmodule.exports.board = board;\n';
-	fs.writeFile("./dbs/db1.cjs", (devices_export + board_export), function(err) {
+	fs.writeFile("./dbs/dbs.cjs", (devices_export + board_export), function(err) {
 	if(err) {return console.log(err);}});
     console.log("Database Updated!");
     };
@@ -38,18 +41,18 @@ app.get('/devices/:deviceID', (req, res) => {
 });
 
 app.post('/devices/:deviceID', (req, res) => {
-	const id = uuidv4(); 				//Gen ID
+  
 	const device = {
-	    id, 					//based on URL
-	    boardId: req.body.boardId,
+	    id:req.params.deviceID,
 	    name: req.body.name,
-	    pin: req.body.pin,				//based on body
+	    pin: req.params.deviceID,				//based on body
 	    value: req.body.value,			//tbd
 	    mode: req.body.mode,
 	    };
-	devices[id] = device;
+	    rpio.open(req.params.deviceID, rpio[device.mode], rpio[device.value])//i.e: 30,OUTPUT, HIGH //make exceptions
+	devices[req.params.deviceID] = device;
 	databaseUpdate();
-    return res.send(device);
+    return res.json(device);
 });
 
 app.delete('/devices/:deviceID', (req, res) => {
@@ -59,19 +62,19 @@ app.delete('/devices/:deviceID', (req, res) => {
   } = devices;
   devices = otherDevices;
   databaseUpdate();
-  return res.send(device);
+  return res.json(device);
 });
+
 /////	route '/board/
 
 app.get('/board', (req, res) => {
   return res.send(Object.values(board));
 });
 
+/////	route '/board/boardPin
+
 app.get('/board/:boardPin', (req, res) => {
   return res.send(board[req.params.boardPin]);
-});
-app.delete('/devices/:deviceID', (req, res) => {
-  return res.send('DELETE HTTP method on devices/'+req.params.deviceID+' resource');
 });
 
 
